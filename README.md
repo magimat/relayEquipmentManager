@@ -1,4 +1,13 @@
-﻿# What is relayEquipmentManager?
+
+		docker build -t magimat/rem .
+  docker push magimat/rem
+
+docker run --name rem -d --restart always -p 8080:8080 --privileged -v /home/pi/rem/config.json:/src/config.json -v /home/pi/rem/data/controllerConfig.json:/src/data/controllerConfig.json magimat/rem
+
+
+
+
+# What is relayEquipmentManager?
  
  relayEquipmentManager (REM) is designed as a software management console for hardware interfaces.  It provides an easy to configure and manage user interface that links hardware devices to software solutions such as nodejs-PoolController, MQTT interfaces, and web sockets. Initially, REM was written to take advantage of source triggers to trigger relays via GPIO (General Purpose Input/Output) on Raspberry Pi and BeagleBone boards, but since its inception, it has been expanded to support several common I2c and SPI interface controllers.
  
