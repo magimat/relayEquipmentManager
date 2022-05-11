@@ -176,7 +176,7 @@ export class ads1x15 extends i2cDeviceBase {
             let arr = ret.buffer.toJSON().data;
             return (arr[0] * 256) + arr[1];
         }
-        catch (err) { logger.error(`${this.device.name} Read Register: ${err.message}`); }
+        catch (err) {  }
     }
     public async stopRead() {
         if (typeof this._timerRead !== 'undefined')
@@ -314,7 +314,7 @@ export class ads1x15 extends i2cDeviceBase {
                     // 65355 = max
                     // 4.096 = pga
                     // 21,265 / 32,767 * 4.096
-                    let voltage = this.getVoltageFromValue(value, channels[i].pga, channels[i].reverseBias);
+                    let voltage = this.getVoltageFromValue(value, channels[i].pga);
                     let valElem = this.device.values.channels.find(elem => { return elem.id === channels[i].id });
                     if (typeof valElem !== 'undefined') {
                         valElem.value = value;
@@ -367,13 +367,12 @@ export class ads1x15 extends i2cDeviceBase {
         //    return value;
         //}
     }
-    private getVoltageFromValue(value, pga, reverseBias) {
+    private getVoltageFromValue(value, pga) {
         let max = ads1x15.thresholdValues[this.device.options.adcType];
         // positive values must be 1 less than max range value (e.g. full scale of 12 bit ADC => 2^(12-1)-1 => -2048 to 2047)
         max = value > 0 ? max - 1 : max;
         logger.silly(`${this.options.name} Convert Voltage ${value} / ${max} * ${pga} = ${value / max * pga}`);
-        let volts = value / max * pga; // value / mx = % of scale, scale * pga = Volts
-        return reverseBias ? pga - volts : volts;
+        return value / max * pga; // value / mx = % of scale, scale * pga = Volts
     }
 
     public async setOptions(opts): Promise<any> {
@@ -388,8 +387,10 @@ export class ads1x15 extends i2cDeviceBase {
             }
             if (typeof opts.channels !== 'undefined') this.device.options.channels = opts.channels;
             for (let c of opts.channels) {
-
-                c.pgaMask = this.pga.get(c.pga).pgaMask;
+logger.info("---------------------" + c.pga)
+                if (typeof c.pga !== 'undefined') {
+                    c.pgaMask = this.pga.get(c.pga).pgaMask;
+                }
             }
             this.channels.sort((a, b) => { return a.id - b.id; });
             this.pollReadings();
